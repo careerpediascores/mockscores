@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Interview Scores</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #ff9800, #ffeb3b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .image {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .image img {
+            max-width: 100%;
+            height: auto;
+            width: 300px; /* Adjust this value as necessary */
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin: 10px 0;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e68900;
+        }
+
+        .details {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .detail-box {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .green {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .yellow {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .red {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Popup styles */
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .popup-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 400px;
+            width: 80%;
+        }
+
+        .popup-content button {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .popup-content button:hover {
+            background: #e68900;
+        }
+    </style>
+</head>
+<body>
+    <div class="image">
+        <img src="https://assets-global.website-files.com/6417debf5aac655a56a357c4/6417e0887b8e0110e534befc_Careerpedia%20-%20Hi%20-%20Res.png" alt="Career Image">
+    </div>
+    <div class="container">
+        <h1>Student Interview Scores</h1>
+        <input type="text" id="studentIdInput" placeholder="Enter Student ID">
+        <button onclick="fetchStudentDetails()">Get Details</button>
+        <div id="studentDetails" class="details"></div>
+    </div>
+
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <p id="remarksText"></p>
+            <button onclick="closePopup()">Close</button>
+        </div>
+    </div>
+    <br>
+    <button id="printButton">Print</button>
+
+    <script>
+        // Embedded CSV data
+        const csvData = `
+cpid,name,attendance,communication,theoritical,practical,remarks
+CPB02001,Sathyanarayana Yalla,Absent,0,0,0,we request you to attend interviews regulary
+CPB02002,Gokul P,Absent,0,0,0,we request you to attend interviews regulary
+CPB02003,Akhilesh Chavan ,Present,7,8,3,To improve your practical skills focus on practicing coding exercises regularly and working on projects or challenges on platforms like LeetCode HackerRank or GitHub to gain practical experience and confidence
+CPB02004,Kiran Kumar Addakula,Present,6,7,5,To enhance your practical skills* dedicate time to regular coding practice and participate in coding challenges on platforms like LeetCode* HackerRank* or GitHub. Improving communication skills can also be beneficial; try engaging in more group discussions and seeking constructive feedback from peers.
+CPB02005,Ravi T,Present,5,6,5,Your communication skills are average; focus on improving clarity and conciseness through group discussions and participation in communication clubs. Your theoretical understanding is decent but can be enhanced by engaging with extra resources. For practical skills* more hands-on practice and seeking feedback from peers will be beneficial.
+CPB02006,Ankitha C ,Present,6,4,5,Your communication skills are average; consider enhancing clarity and conciseness through active participation in group discussions and communication clubs. Your theoretical understanding is fair* but could benefit from deeper engagement with additional resources. In practical skills* more hands-on practice and seeking constructive feedback from peers will help you improve.
+CPB02007,Charan raj,Present,8,8,8,Your communication skills are excellent* demonstrating clarity and effective engagement in group discussions. Your theoretical understanding is strong* reflecting thorough knowledge and engagement with the material. In practical skills* your performance is commendable* showing proficiency and effective application of knowledge.
+CPB02008,P shruthi,Present,8,8,6,Your communication skills are excellent* demonstrating clarity and effective engagement in group discussions. Your theoretical understanding is strong* reflecting thorough knowledge and engagement with the material. In practical skills* continue to enhance through more hands-on practice and seeking feedback for further improvement
+CPB02009,Kallakuri narendra chakravarthi,Absent,0,0,0,we request you to attend interviews regulary
+CPB02010,Chiranjeevi,Absent,0,0,0,we request you to attend interviews regulary
+CPB02011,Sravanthi,Absent,0,0,0,we request you to attend interviews regulary
+CPB02012,Dinnepati Jaswanth Kumar Reddy,Absent,0,0,0,we request you to attend interviews regulary
+CPB02013,Madhuri,Absent,0,0,0,we request you to attend interviews regulary
+CPB02014,M. Guru Nithin,Present,7,8,6,Your communication skills are good* demonstrating clarity and active participation in discussions. You have a strong grasp of theoretical concepts* reflecting thorough engagement with the material. In practical skills* focus on refining through more hands-on experience and seeking constructive feedback for further growth.
+CPB02015,K.sairam,Present,7,6,6,Your communication skills are commendable* with clear and engaged participation in discussions. Your theoretical understanding is solid* reflecting a good grasp of the material. In practical skills* continue to refine through more hands-on experience and seek feedback for further improvement.
+CPB02016,K. Shiva krishna,Absent,0,0,0,we request you to attend interviews regulary
+CPB02017,Satyagopal pakki,Absent,0,5,0,we request you to attend interviews regulary
+CPB02018,D. Tejaswi,Absent,0,0,0,we request you to attend interviews regulary
+CPB02019,Salman Raj Veeranki,Absent,0,0,0,we request you to attend interviews regulary
+CPB02020,V.Santosh ,Absent,0,5,0,we request you to attend interviews regulary
+CPB02021,Shruthi DS,Present,7,9,7,Your communication skills are commendable* with clear and engaged participation in discussions. Your theoretical understanding is strong* reflecting a thorough grasp of the material. In practical skills* you demonstrate proficiency with effective application and could benefit from seeking feedback for further enhancement.
+CPB02022,Shaik Sazia Athar,Present,8,8,7,Your communication skills are strong* demonstrating clarity and effective engagement in discussions. Your theoretical understanding is robust* reflecting deep knowledge and engagement with the material. In practical skills* your performance is commendable* showing proficiency and effective application of knowledge.
+CPB02023,Balnars,Present,5,9,6,Your communication skills could benefit from clearer articulation and more active participation in discussions. Your theoretical understanding is strong* demonstrating a deep grasp of the material. In practical skills* continue to refine through more hands-on practice and seeking constructive feedback for improvement.
+CPB02024,Siva Shanker p,Present,7,9,7,Your communication skills are good* with clear and effective engagement in discussions. Your theoretical understanding is strong* reflecting a deep grasp of the material. In practical skills* you demonstrate proficiency and effective application* continuing to seek feedback for further enhancement.
+CPB02025,Prasanna,Absent,0,0,0,we request you to attend interviews regulary
+CPB02026,sai teja,Absent,0,0,0,we request you to attend interviews regulary
+CPB02027,Bommidi Bhavya Sri,Absent,0,0,0,we request you to attend interviews regulary
+CPB02028,Indigibilla Pratyusha,Present,7,7,6,Your communication skills are satisfactory* with clear participation in discussions. Your theoretical understanding is solid* demonstrating a good grasp of the material. In practical skills* continue to improve through more hands-on practice and seeking feedback for further development.
+CPB02029,sai kumar,Absent,6,0,0,we request you to attend interviews regulary
+CPB02030,Manjunadh Ramachandrula,Absent,0,0,0,we request you to attend interviews regulary
+CPB02031,Somendra Sai. M,Absent,0,0,0,we request you to attend interviews regulary
+CPB02032,Amargonda Srinivas,Present,5,8,6,Your communication skills could benefit from clearer expression and more active participation in discussions. Your theoretical understanding is strong* indicating a good grasp of the material. In practical skills* continue refining through more hands-on practice and seeking feedback for improvement.
+CPB02033,Udaykrishna Chilaka,Absent,0,0,0,we request you to attend interviews regulary
+CPB02034,Shaik Baji,Present,8,4,6,Your communication skills are strong* with clear and effective expression in discussions. Your theoretical understanding is decent* but could benefit from deeper engagement with the material. In practical skills* focus on enhancing through more hands-on practice and seeking constructive feedback for improvement.
+CPB02035,Guruvender Singh,Absent,0,0,0,we request you to attend interviews regulary
+CPB02036,Jhansi Chinthapula,Absent,0,0,0,we request you to attend interviews regulary
+CPB02037,Suchith Kumar Rudra,Absent,0,0,0,we request you to attend interviews regulary
+CPB02038,Suresh kotla,Present,7,6,6,Your communication skills are good* showing clarity and engagement in discussions. Your theoretical understanding is adequate* though further engagement with the material could enhance your grasp. In practical skills* continue to develop through more hands-on practice and seeking feedback for improvement.
+CPB02039,Ithihas manda ,Present,8,7,6,Your communication skills are strong demonstrating clarity and effective engagement in discussions. Your theoretical understanding is solid reflecting a good grasp of the material. In practical skills continue to develop through more hands-on practice and seeking feedback for further improvement.
+CPB02040,Anudeep gupta,Present,7,6,7,Your communication skills are solid demonstrating clarity and effective engagement in discussions. Your theoretical understanding is adequate with room for deeper engagement with the material. In practical skills continue to develop through more hands-on practice and seeking feedback for further improvement.
+CPB02041,D Abrar Ahmed ,Present,7,7,6,Your communication skills are solid demonstrating clarity and effective engagement in discussions. Your theoretical understanding is good reflecting a strong grasp of the material. In practical skills continue to develop through more hands-on practice and seeking feedback for further improvement.
+CPB02042,Yadav Kumar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02043,Kandakatla Vishwas,Absent,0,0,0,we request you to attend interviews regulary
+CPB02044,Nijamuddin,Present,5,5,6,Your communication skills show potential for improvement in clarity and engagement in discussions. Your theoretical understanding is adequate though more thorough engagement with the material is recommended. In practical skills focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02045,Kaandru Vikhil Chowdary,Present,7,6,5,Your communication skills demonstrate clarity and engagement in discussions. Your theoretical understanding is decent* though further engagement with the material is recommended. In practical skills* focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02046,Sravan rao puskoor,Present,6,5,5,Your communication skills show potential for improvement in clarity and engagement in discussions. Your theoretical understanding is adequate* but deeper engagement with the material is recommended. In practical skills* focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02047,Tulasi Venkata Swamy,Absent,0,0,0,we request you to attend interviews regulary
+CPB02048,Pavan kumar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02049,Akkala Kiran Kumar,Present,7,6,6,Your communication skills are solid demonstrating clarity and engagement in discussions. Your theoretical understanding is adequate though deeper engagement with the material is recommended. In practical skills focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02050,G. Kiran Kumar,Present,6,8,6,Your communication skills demonstrate clarity and engagement in discussions. Your theoretical understanding is strong reflecting a good grasp of the material. In practical skills continue to develop through more hands-on practice and seeking feedback for further improvement.
+CPB02051,Vadla Srinivas Chary,Absent,0,0,0,we request you to attend interviews regulary
+CPB02052,Batti Maruthi Goud,Absent,0,0,0,we request you to attend interviews regulary
+CPB02053,P. Karun Kumar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02054,N. Charan,Absent,0,0,0,we request you to attend interviews regulary
+CPB02055,Giridhar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02056,Harsha Nandyala,Present,7,6,6,Your communication skills demonstrate clarity and engagement in discussions. Your theoretical understanding is adequate with room for deeper engagement. In practical skills focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02057,T.Srinivas,Absent,0,0,0,we request you to attend interviews regulary
+CPB02058,Dattesh B ,Present,6,7,7,Your communication skills show clarity and engagement in discussions. Your theoretical understanding is solid indicating a good grasp of the material. In practical skills continue to develop through more hands-on practice and seek feedback for further improvement.
+CPB02059,Milli Beena,Present,5,6,5,Your communication skills could benefit from clearer expression and more active participation in discussions. Your theoretical understanding is adequate* though further engagement with the material is recommended. In practical skills* focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02060,M Praveen,Present,7,8,6,Your communication skills are effective demonstrating clarity and engagement in discussions. Your theoretical understanding is strong reflecting a good grasp of the material. In practical skills continue to develop through more hands-on practice and seek feedback for improvement.
+CPB02061,T Durga Prasad,Present,4,7,5,Your communication skills require improvement in clarity and engagement during discussions. Your theoretical understanding is solid* indicating a decent grasp of the material. In practical skills* focus on developing through more hands-on practice and seeking constructive feedback for improvement.
+CPB02062,Sri harsha K,Present,9,8,5,Your communication skills are excellent demonstrating clear and engaging discussions. Your theoretical understanding is strong reflecting a solid grasp of the material. In practical skills focus on enhancing through more hands-on practice and seeking feedback for improvement.
+CPB02063,Sudhakar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02064,M Naveen Kumar,Absent,0,0,0,we request you to attend interviews regulary
+CPB02065,Bhavya,Absent,0,0,0,we request you to attend interviews regulary
+CPB02066,Nishitha,Present,5,4,5,Your communication skills could benefit from clearer expression and more active participation in discussions. Your theoretical understanding is adequate though further engagement with the material is recommended. In practical skills focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02067,Koppal Naveen,Absent,0,0,0,we request you to attend interviews regulary
+CPB02068,Prashanth Tuniki,Present,6,7,6,"Your communication skills demonstrate clarity and effective engagement in discussions. Your theoretical understanding is solid reflecting a good grasp of the material. In practical skills continue to develop through more hands-on practice and seek feedback for further improvement.
+CPB02069,Sai Sudha k,Present,8,7,6,Your communication skills are clear and engaging in discussions. Your theoretical understanding is strong* demonstrating a good grasp of the material. In practical skills* continue to develop through more hands-on practice and seek feedback for improvement.
+CPB02070,Sumanth kumar reddy M,Present,6,8,9,Your communication skills demonstrate clarity and effective engagement in discussions. Your theoretical understanding is strong reflecting a thorough grasp of the material. In practical skills your performance is commendable showing proficiency and effective application of knowledge.
+CPB02071,T Sathish,Present,5,10,9,"Your communication skills show potential for improvement in clarity and engagement in discussions. Your theoretical understanding is excellent reflecting a thorough grasp of the material. In practical skills your performance is commendable showing proficiency and effective application of knowledge.
+CPB02072,Harshavardhan A,Present,7,8,5,Your communication skills are solid* demonstrating clarity and effective engagement in discussions. Your theoretical understanding is strong* reflecting a good grasp of the material. In practical skills* focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02073,Y Sai koushik,Present,6,7,5,Your communication skills show potential for improvement in clarity and engagement in discussions. Your theoretical understanding is solid indicating a good grasp of the material. In practical skills focus on developing through more hands-on practice and seeking feedback for improvement.
+CPB02074,K Naresh,Present,6,7,8,Your communication skills are clear and engaging in discussions. Your theoretical understanding is solid* demonstrating a good grasp of the material. In practical skills* your performance is commendable* showing proficiency and effective application of knowledge.
+`;
+
+        // Parse CSV data
+        function parseCSV(data) {
+            const lines = data.trim().split('\n');
+            const headers = lines[0].split(',');
+            const students = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const cols = lines[i].split(',');
+                const student = {};
+                headers.forEach((header, index) => {
+                    student[header.trim()] = cols[index].trim();
+                });
+                students.push(student);
+            }
+            return students;
+        }
+
+        // Fetch student details
+        function fetchStudentDetails() {
+            const studentId = document.getElementById('studentIdInput').value.trim();
+            if (!studentId) {
+                alert('Please enter a student ID');
+                return;
+            }
+
+            const studentsData = parseCSV(csvData);
+            const studentDetails = studentsData.find(student => student.cpid === studentId);
+            displayStudentDetails(studentDetails);
+        }
+
+        // Display student details
+        function displayStudentDetails(details) {
+            const detailsDiv = document.getElementById('studentDetails');
+            if (details) {
+                detailsDiv.innerHTML = `
+                    <div class="detail-box"><strong>ID:</strong> ${details.cpid}</div>
+                    <div class="detail-box"><strong>Name:</strong> ${details.name}</div>
+                    <div class="detail-box"><strong>Attendance:</strong> ${details.attendance}</div>
+                    <div class="detail-box ${getColorClass(details.communication)}"><strong>Communication:</strong> ${details.communication}</div>
+                    <div class="detail-box ${getColorClass(details.theoritical)}"><strong>Theory:</strong> ${details.theoritical}</div>
+                    <div class="detail-box ${getColorClass(details.practical)}"><strong>Practical:</strong> ${details.practical}</div>
+                    <div class="detail-box"><strong>Remarks:</strong> <a href="javascript:void(0);" onclick="showRemarks('${details.remarks}')">click here</a></div>
+                `;
+            } else {
+                detailsDiv.innerHTML = '<p>No student found with this ID.</p>';
+            }
+        }
+
+        // Get color class based on value
+        function getColorClass(value) {
+            if (value >= 7) {
+                return 'green';
+            } else if (value >= 5 && value < 7) {
+                return 'yellow';
+            } else {
+                return 'red';
+            }
+        }
+
+        // Show remarks popup
+        function showRemarks(remarks) {
+            document.getElementById('remarksText').innerText = remarks;
+            document.getElementById('popup').style.display = 'flex';
+        }
+
+        // Close remarks popup
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        // Event listener for Enter key
+        document.getElementById('studentIdInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                fetchStudentDetails();
+            }
+        });
+
+        // JavaScript function to handle printing
+        function printPage() {
+            window.print(); // This is the browser's built-in print function
+        }
+
+        // Attach the function to the button click event
+        document.getElementById("printButton").addEventListener("click", printPage);
+    </script>
+</body>
+</html>
